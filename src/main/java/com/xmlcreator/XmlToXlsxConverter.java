@@ -3,9 +3,19 @@ package com.xmlcreator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import javax.swing.text.Document;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 public class XmlToXlsxConverter {
     public static void run(String[] args) {
@@ -14,12 +24,23 @@ public class XmlToXlsxConverter {
     
         try {
             FileInputStream file = new FileInputStream(new File(xmlFilePath));
+            SAXReader reader = new SAXReader();
+            Document doc = reader.read(file);
 
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilderFactory docBuilder = docFactory.
+            Element root = doc.getRootElement();
+            List<Element> elements = root.elements();
+            Element firstElm = elements.get(0); 
+            List<String> titles = IntStream.range(0, firstElm.nodeCount())
+                .mapToObj(i -> firstElm.node(i).getName())
+                .collect(Collectors.toList()); 
+
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet(root.getName());
+            
             
 
-        } catch (IOException e) {
+
+        } catch (IOException | DocumentException e) {
             e.printStackTrace();
         }
     }
